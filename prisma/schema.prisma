@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model StudyDay {
+  id             String           @id @default(cuid())
+  dayNumber      Int              @unique
+  scheduledDate  DateTime
+  sectionTitle   String
+  kind           String
+  courseLesson   Int?
+  moduleTitle    String
+  topicTitle     String
+  summaryContent String
+  keyTakeaways   String
+  checklistTasks String
+  isCompleted    Boolean          @default(false)
+  completedAt    DateTime?
+  minutesStudied Int              @default(0)
+  notes          String?
+  flashcards     Flashcard[]
+  challenges     DailyChallenge[]
+
+  @@index([scheduledDate])
+  @@index([isCompleted])
+}
+
+model Flashcard {
+  id           String   @id @default(cuid())
+  studyDayId   String
+  studyDay     StudyDay @relation(fields: [studyDayId], references: [id], onDelete: Cascade)
+  moduleTitle  String
+  question     String
+  answer       String
+  codeExample  String?
+  nextReviewAt DateTime
+  intervalDays Int      @default(1)
+  easeFactor   Float    @default(2.5)
+  repetitions  Int      @default(0)
+
+  @@index([nextReviewAt])
+}
+
+model DailyChallenge {
+  id           String   @id @default(cuid())
+  studyDayId   String
+  studyDay     StudyDay @relation(fields: [studyDayId], references: [id], onDelete: Cascade)
+  title        String
+  description  String
+  starterCode  String?
+  hint         String
+  solutionCode String
+  isCompleted  Boolean  @default(false)
+  userCode     String?
+
+  @@index([isCompleted])
+}
