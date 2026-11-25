@@ -1,11 +1,16 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { DATABASE_URL } from "@/lib/database-url";
+
+const MAX_CONNECTIONS = 5;
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createPrismaClient(): PrismaClient {
-  const adapter = new PrismaBetterSqlite3({ url: DATABASE_URL });
+  const adapter = new PrismaPg({
+    connectionString: DATABASE_URL,
+    max: MAX_CONNECTIONS,
+  });
   return new PrismaClient({ adapter });
 }
 

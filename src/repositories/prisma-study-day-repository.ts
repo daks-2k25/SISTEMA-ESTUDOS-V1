@@ -42,7 +42,6 @@ function toStudyDay(row: StudyDayRow): StudyDay {
 
 function toContentPersistence(data: NewStudyDay) {
   return {
-    scheduledDate: data.scheduledDate,
     sectionTitle: data.sectionTitle,
     kind: data.kind,
     courseLesson: data.courseLesson,
@@ -57,6 +56,7 @@ function toCreatePersistence(data: NewStudyDay) {
   return {
     ...toContentPersistence(data),
     dayNumber: data.dayNumber,
+    scheduledDate: data.scheduledDate,
     checklistTasks: serializeChecklist(data.checklistTasks),
     isCompleted: data.isCompleted,
     completedAt: data.completedAt,

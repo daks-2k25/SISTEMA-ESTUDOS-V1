@@ -1,3 +1,4 @@
+import "./env-setup";
 import { prisma } from "@/lib/prisma";
 import { PrismaStudyDayRepository } from "@/repositories/prisma-study-day-repository";
 import { PrismaFlashcardRepository } from "@/repositories/prisma-flashcard-repository";

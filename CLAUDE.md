@@ -10,7 +10,7 @@ Estas regras valem para TODAS as fases e devem ser seguidas sempre.
 - TypeScript em modo strict
 - Tailwind CSS
 - Lucide Icons (lucide-react)
-- Prisma ORM em versão ESTÁVEL (não usar release candidate/rc/beta) com SQLite
+- Prisma ORM em versão ESTÁVEL (não usar release candidate/rc/beta) com PostgreSQL (Neon)
 - Zod para validação
 - Server Actions para mutações
 
@@ -32,7 +32,7 @@ Clean Architecture, DRY e SOLID.
 - NUNCA escrever comentários no código (nenhum //, /* */ ou JSX {/* */}). Nomes claros substituem comentários.
 - Sem `any`. Tipos explícitos nas fronteiras. Funções pequenas com uma responsabilidade.
 - Nada de lógica de negócio dentro de componentes.
-- Campos JSON no SQLite ficam como string; converta com funções de mapeamento no repositório (parse/serialize), nunca espalhe JSON.parse pela UI.
+- Campos JSON ficam como string (texto) no banco; converta com funções de mapeamento no repositório (parse/serialize), nunca espalhe JSON.parse pela UI.
 
 ## Visual
 
