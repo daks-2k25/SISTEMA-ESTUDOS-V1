@@ -12,7 +12,7 @@ export async function rescheduleFromToday(
   now: Date,
   timeZone: string,
 ): Promise<RescheduleResult> {
-  const days = await repository.findAll();
+  const days = await repository.findSummaries();
   const updates = planReschedule(days, now, timeZone);
 
   if (updates.length === 0) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { AlertTriangle, CheckCircle2, PartyPopper, Undo2 } from "lucide-react";
 import { completeDay, uncompleteDay } from "@/actions/study-day-actions";
 import { Button } from "@/components/ui/button";
@@ -19,19 +19,15 @@ export function CompleteDayCard({
   completedAtLabel,
   pendingTasks,
 }: CompleteDayCardProps) {
+  const [shownAsCompleted, showAsCompleted] = useOptimistic(isCompleted);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function handleComplete() {
+  function changeCompletion(completed: boolean) {
     startTransition(async () => {
-      const result = await completeDay({ studyDayId });
-      setError(result.ok ? null : result.error);
-    });
-  }
-
-  function handleUndo() {
-    startTransition(async () => {
-      const result = await uncompleteDay({ studyDayId });
+      showAsCompleted(completed);
+      const action = completed ? completeDay : uncompleteDay;
+      const result = await action({ studyDayId });
       setError(result.ok ? null : result.error);
     });
   }
@@ -39,9 +35,9 @@ export function CompleteDayCard({
   return (
     <GlassCard
       ariaLabel="Concluir o dia"
-      className={isCompleted ? "border-emerald-400/30 bg-emerald-500/10" : undefined}
+      className={shownAsCompleted ? "border-emerald-400/30 bg-emerald-500/10" : undefined}
     >
-      {isCompleted ? (
+      {shownAsCompleted ? (
         <div className="space-y-4 text-center">
           <PartyPopper aria-hidden className="mx-auto size-10 text-emerald-300" />
           <div>
@@ -54,7 +50,7 @@ export function CompleteDayCard({
             variant="secondary"
             icon={Undo2}
             loading={isPending}
-            onClick={handleUndo}
+            onClick={() => changeCompletion(false)}
             fullWidth
           >
             Desfazer conclusão
@@ -75,7 +71,7 @@ export function CompleteDayCard({
           <Button
             icon={CheckCircle2}
             loading={isPending}
-            onClick={handleComplete}
+            onClick={() => changeCompletion(true)}
             fullWidth
             className="glow-button min-h-16 text-lg"
           >

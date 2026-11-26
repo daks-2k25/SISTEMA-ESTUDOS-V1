@@ -20,11 +20,10 @@ export async function getNavbarSummary(
   now: Date,
   timeZone: string,
 ): Promise<NavbarSummary> {
-  const days = await repositories.studyDays.findAll();
-  const dueFlashcards = await repositories.flashcards.countDue({
-    now,
-    releasedUntil: startOfCalendarDay(now, timeZone),
-  });
+  const [days, dueFlashcards] = await Promise.all([
+    repositories.studyDays.findSummaries(),
+    repositories.flashcards.countDue({ now, releasedUntil: startOfCalendarDay(now, timeZone) }),
+  ]);
 
   const completionDates = days
     .map((day) => day.completedAt)

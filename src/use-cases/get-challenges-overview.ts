@@ -1,5 +1,5 @@
 import type { DailyChallenge } from "@/domain/daily-challenge";
-import type { StudyDay } from "@/domain/study-day";
+import type { StudyDaySummary } from "@/domain/study-day";
 import type { DailyChallengeRepository } from "@/repositories/daily-challenge-repository";
 import type { StudyDayRepository } from "@/repositories/study-day-repository";
 import {
@@ -45,18 +45,18 @@ export interface ChallengesQuery {
 }
 
 function accessibleDays(
-  days: StudyDay[],
+  days: StudyDaySummary[],
   currentDayNumber: number | null,
   now: Date,
   timeZone: string,
-): StudyDay[] {
+): StudyDaySummary[] {
   return days.filter(
     (day) =>
       day.dayNumber === currentDayNumber || isDayReleased(day, now, timeZone),
   );
 }
 
-function toListItem(challenge: DailyChallenge, day: StudyDay): ChallengeListItem {
+function toListItem(challenge: DailyChallenge, day: StudyDaySummary): ChallengeListItem {
   return {
     id: challenge.id,
     title: challenge.title,
@@ -70,7 +70,7 @@ export async function getChallengesOverview(
   repositories: ChallengesRepositories,
   query: ChallengesQuery,
 ): Promise<ChallengesOverview> {
-  const days = await repositories.studyDays.findAll();
+  const days = await repositories.studyDays.findSummaries();
   const currentDayNumber = chooseDayNumber(null, days);
   const available = accessibleDays(days, currentDayNumber, query.now, query.timeZone);
   const dayById = new Map(available.map((day) => [day.id, day]));
@@ -78,7 +78,7 @@ export async function getChallengesOverview(
   const challenges = await repositories.challenges.findByStudyDayIds([...dayById.keys()]);
   const entries = challenges
     .map((challenge) => ({ challenge, day: dayById.get(challenge.studyDayId) }))
-    .filter((entry): entry is { challenge: DailyChallenge; day: StudyDay } => entry.day !== undefined)
+    .filter((entry): entry is { challenge: DailyChallenge; day: StudyDaySummary } => entry.day !== undefined)
     .sort((first, second) => first.day.dayNumber - second.day.dayNumber);
 
   const items = entries.map((entry) => toListItem(entry.challenge, entry.day));

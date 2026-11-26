@@ -1,4 +1,4 @@
-import type { StudyDay, StudyDayWithRelations } from "@/domain/study-day";
+import type { StudyDaySummary, StudyDayWithRelations } from "@/domain/study-day";
 import type { StudyDayKind } from "@/domain/study-day-kind";
 import type { StudyDayRepository } from "@/repositories/study-day-repository";
 import { countPendingTasks } from "@/services/checklist";
@@ -35,11 +35,11 @@ export interface DashboardQuery {
   timeZone: string;
 }
 
-function distinctModuleTitles(days: StudyDay[]): string[] {
+function distinctModuleTitles(days: StudyDaySummary[]): string[] {
   return [...new Set(days.map((day) => day.moduleTitle))];
 }
 
-function toModuleDaySummary(day: StudyDay): ModuleDaySummary {
+function toModuleDaySummary(day: StudyDaySummary): ModuleDaySummary {
   return {
     dayNumber: day.dayNumber,
     topicTitle: day.topicTitle,
@@ -52,11 +52,17 @@ export async function getDashboard(
   repository: StudyDayRepository,
   query: DashboardQuery,
 ): Promise<DashboardData | null> {
-  const days = await repository.findAll();
+  const [days, requestedDay] = await Promise.all([
+    repository.findSummaries(),
+    query.requestedDay === null ? null : repository.findByDayNumber(query.requestedDay),
+  ]);
   const dayNumber = chooseDayNumber(query.requestedDay, days);
   if (dayNumber === null) return null;
 
-  const day = await repository.findByDayNumber(dayNumber);
+  const day =
+    requestedDay?.dayNumber === dayNumber
+      ? requestedDay
+      : await repository.findByDayNumber(dayNumber);
   if (!day) return null;
 
   const moduleTitles = distinctModuleTitles(days);

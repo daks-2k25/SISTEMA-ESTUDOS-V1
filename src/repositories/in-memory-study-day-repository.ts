@@ -4,6 +4,7 @@ import type {
   NewStudyDay,
   ScheduledDateUpdate,
   StudyDay,
+  StudyDaySummary,
   StudyDayWithRelations,
 } from "@/domain/study-day";
 import type {
@@ -35,6 +36,10 @@ export class InMemoryStudyDayRepository implements StudyDayRepository {
 
   async findAll(): Promise<StudyDay[]> {
     return [...this.days].sort((first, second) => first.dayNumber - second.dayNumber);
+  }
+
+  async findSummaries(): Promise<StudyDaySummary[]> {
+    return this.findAll();
   }
 
   async upsertByDayNumber(data: NewStudyDay): Promise<StudyDay> {

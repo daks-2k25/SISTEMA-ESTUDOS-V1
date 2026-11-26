@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, PartyPopper, RefreshCw } from "lucide-react";
 import { rateFlashcard } from "@/actions/flashcard-actions";
@@ -27,6 +27,9 @@ interface FlashcardsStudyProps {
   cards: StudyCard[];
 }
 
+const UNSAVED_RATING_MESSAGE =
+  "Não foi possível salvar a avaliação de um card. Ele continua pendente e volta na próxima sessão.";
+
 const RATING_KEYS: Record<string, FlashcardRating> = {
   "1": 1,
   "2": 2,
@@ -41,33 +44,39 @@ export function FlashcardsStudy({ cards }: FlashcardsStudyProps) {
   const [position, setPosition] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isCheckingForCards, setIsCheckingForCards] = useState(false);
 
   const finished = position >= queue.length;
   const current = finished ? null : queue[position];
 
   if (cards !== sourceCards) {
     setSourceCards(cards);
-    if (finished && cards.length > 0) {
-      setQueue(cards);
-      setPosition(0);
-      setRevealed(false);
-    }
+    if (finished && isCheckingForCards && cards.length > 0) startSession(cards);
+  }
+
+  function startSession(nextCards: StudyCard[]) {
+    setQueue(nextCards);
+    setPosition(0);
+    setRevealed(false);
+    setIsCheckingForCards(false);
+  }
+
+  function checkForNewCards() {
+    setIsCheckingForCards(true);
+    router.refresh();
+  }
+
+  async function saveRating(flashcardId: string, rating: FlashcardRating) {
+    const result = await rateFlashcard({ flashcardId, rating });
+    if (!result.ok) setError(UNSAVED_RATING_MESSAGE);
   }
 
   function handleRate(rating: FlashcardRating) {
-    if (!current || !revealed || isPending) return;
-    const flashcardId = current.id;
-    startTransition(async () => {
-      const result = await rateFlashcard({ flashcardId, rating });
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      setError(null);
-      setPosition((value) => value + 1);
-      setRevealed(false);
-    });
+    if (!current || !revealed) return;
+    setError(null);
+    setPosition((value) => value + 1);
+    setRevealed(false);
+    void saveRating(current.id, rating);
   }
 
   useEffect(() => {
@@ -105,7 +114,8 @@ export function FlashcardsStudy({ cards }: FlashcardsStudyProps) {
           className="mt-5"
           icon={RefreshCw}
           variant="secondary"
-          onClick={() => router.refresh()}
+          loading={isCheckingForCards}
+          onClick={checkForNewCards}
         >
           Verificar novos cards
         </Button>
@@ -155,7 +165,6 @@ export function FlashcardsStudy({ cards }: FlashcardsStudyProps) {
               key={rating}
               rating={rating}
               interval={current.intervalPreview[rating]}
-              disabled={isPending}
               onRate={handleRate}
             />
           ))}

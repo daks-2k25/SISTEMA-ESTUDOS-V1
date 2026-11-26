@@ -14,26 +14,19 @@ const RATING_STYLES: Record<FlashcardRating, string> = {
 interface RatingButtonProps {
   rating: FlashcardRating;
   interval: string;
-  disabled: boolean;
   onRate: (rating: FlashcardRating) => void;
 }
 
-export function RatingButton({
-  rating,
-  interval,
-  disabled,
-  onRate,
-}: RatingButtonProps) {
+export function RatingButton({ rating, interval, onRate }: RatingButtonProps) {
   const label = FLASHCARD_RATING_LABELS[rating];
 
   return (
     <button
       type="button"
-      disabled={disabled}
       onClick={() => onRate(rating)}
       aria-label={label + ", próxima revisão em " + interval + ", atalho " + rating}
       className={cn(
-        "flex min-h-20 flex-col items-center justify-center gap-0.5 rounded-2xl border px-2 py-3 font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400 disabled:cursor-not-allowed disabled:opacity-50",
+        "flex min-h-20 flex-col items-center justify-center gap-0.5 rounded-2xl border px-2 py-3 font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400",
         RATING_STYLES[rating],
       )}
     >

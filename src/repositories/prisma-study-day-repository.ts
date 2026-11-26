@@ -1,10 +1,11 @@
-import type { PrismaClient, StudyDay as StudyDayRow } from "@prisma/client";
+import type { Prisma, PrismaClient, StudyDay as StudyDayRow } from "@prisma/client";
 import type {
   ChecklistTask,
   DayReflection,
   NewStudyDay,
   ScheduledDateUpdate,
   StudyDay,
+  StudyDaySummary,
   StudyDayWithRelations,
 } from "@/domain/study-day";
 import { parseStudyDayKind } from "@/domain/study-day-kind";
@@ -20,6 +21,19 @@ import {
 } from "@/lib/json-mappers";
 import { toFlashcard } from "@/repositories/flashcard-mapper";
 import { toDailyChallenge } from "@/repositories/daily-challenge-mapper";
+
+const SUMMARY_COLUMNS = {
+  id: true,
+  dayNumber: true,
+  scheduledDate: true,
+  kind: true,
+  courseLesson: true,
+  moduleTitle: true,
+  topicTitle: true,
+  isCompleted: true,
+  completedAt: true,
+  quizScore: true,
+} satisfies Prisma.StudyDaySelect;
 
 function toStudyDay(row: StudyDayRow): StudyDay {
   return {
@@ -76,15 +90,17 @@ export class PrismaStudyDayRepository implements StudyDayRepository {
   async findByDayNumber(
     dayNumber: number,
   ): Promise<StudyDayWithRelations | null> {
-    const row = await this.client.studyDay.findUnique({
-      where: { dayNumber },
-      include: { flashcards: true, challenges: true },
-    });
+    const byDay = { studyDay: { dayNumber } };
+    const [row, flashcards, challenges] = await Promise.all([
+      this.client.studyDay.findUnique({ where: { dayNumber } }),
+      this.client.flashcard.findMany({ where: byDay }),
+      this.client.dailyChallenge.findMany({ where: byDay }),
+    ]);
     if (!row) return null;
     return {
       ...toStudyDay(row),
-      flashcards: row.flashcards.map(toFlashcard),
-      challenges: row.challenges.map(toDailyChallenge),
+      flashcards: flashcards.map(toFlashcard),
+      challenges: challenges.map(toDailyChallenge),
     };
   }
 
@@ -93,6 +109,14 @@ export class PrismaStudyDayRepository implements StudyDayRepository {
       orderBy: { dayNumber: "asc" },
     });
     return rows.map(toStudyDay);
+  }
+
+  async findSummaries(): Promise<StudyDaySummary[]> {
+    const rows = await this.client.studyDay.findMany({
+      orderBy: { dayNumber: "asc" },
+      select: SUMMARY_COLUMNS,
+    });
+    return rows.map((row) => ({ ...row, kind: parseStudyDayKind(row.kind) }));
   }
 
   async upsertByDayNumber(data: NewStudyDay): Promise<StudyDay> {

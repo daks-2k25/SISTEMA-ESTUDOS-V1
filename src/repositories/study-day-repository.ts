@@ -4,6 +4,7 @@ import type {
   NewStudyDay,
   ScheduledDateUpdate,
   StudyDay,
+  StudyDaySummary,
   StudyDayWithRelations,
 } from "@/domain/study-day";
 
@@ -17,6 +18,7 @@ export interface StudyDayRepository {
   findById(id: string): Promise<StudyDay | null>;
   findByDayNumber(dayNumber: number): Promise<StudyDayWithRelations | null>;
   findAll(): Promise<StudyDay[]>;
+  findSummaries(): Promise<StudyDaySummary[]>;
   upsertByDayNumber(data: NewStudyDay): Promise<StudyDay>;
   updateChecklist(id: string, tasks: ChecklistTask[]): Promise<StudyDay>;
   updateNotes(id: string, notes: string): Promise<StudyDay>;

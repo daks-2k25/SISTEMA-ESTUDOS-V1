@@ -18,7 +18,7 @@ export async function getCalendarOverview(
   now: Date,
   timeZone: string,
 ): Promise<CalendarOverview> {
-  const days = await repository.findAll();
+  const days = await repository.findSummaries();
 
   return {
     months: buildCalendarMonths(days, now, timeZone),

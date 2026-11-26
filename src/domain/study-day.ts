@@ -29,6 +29,20 @@ export interface StudyDay {
   difficulties: string | null;
 }
 
+export type StudyDaySummary = Pick<
+  StudyDay,
+  | "id"
+  | "dayNumber"
+  | "scheduledDate"
+  | "kind"
+  | "courseLesson"
+  | "moduleTitle"
+  | "topicTitle"
+  | "isCompleted"
+  | "completedAt"
+  | "quizScore"
+>;
+
 export interface DayReflection {
   quizScore: number | null;
   difficulties: string | null;

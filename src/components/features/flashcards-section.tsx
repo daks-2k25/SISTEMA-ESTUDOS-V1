@@ -42,7 +42,7 @@ export async function FlashcardsSection() {
   await connection();
   const [due, days] = await Promise.all([
     getDueFlashcards(flashcardRepository, new Date(), APP_TIME_ZONE),
-    studyDayRepository.findAll(),
+    studyDayRepository.findSummaries(),
   ]);
 
   const now = new Date();
