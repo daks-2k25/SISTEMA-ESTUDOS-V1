@@ -4,7 +4,11 @@ import { isValidSessionCookie } from "@/lib/session";
 
 const LOGIN_PATH = "/login";
 
+const SELF_PROTECTED_PATHS = ["/api/calendario.ics", "/api/cron/lembrete"];
+
 export function proxy(request: NextRequest) {
+  if (SELF_PROTECTED_PATHS.includes(request.nextUrl.pathname)) return NextResponse.next();
+
   const isLoggedIn = isValidSessionCookie(
     request.cookies.get(SESSION_COOKIE_NAME)?.value,
   );

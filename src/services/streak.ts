@@ -21,3 +21,14 @@ export function calculateStreak(
 
   return streak;
 }
+
+export function calculateStudyStreak(
+  days: Array<{ completedAt: Date | null }>,
+  now: Date,
+  timeZone: string,
+): number {
+  const completionDates = days
+    .map((day) => day.completedAt)
+    .filter((date): date is Date => date !== null);
+  return calculateStreak(completionDates, now, timeZone);
+}

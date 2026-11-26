@@ -18,6 +18,7 @@ export interface FlashcardRepository {
   findById(id: string): Promise<Flashcard | null>;
   findByStudyDayId(studyDayId: string): Promise<Flashcard[]>;
   create(data: NewFlashcard): Promise<Flashcard>;
+  createMany(cards: NewFlashcard[]): Promise<number>;
   updateSchedule(id: string, schedule: FlashcardSchedule): Promise<Flashcard>;
   createMissingForStudyDay(
     studyDayId: string,

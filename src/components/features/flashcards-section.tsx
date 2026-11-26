@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { connection } from "next/server";
+import { Download, FileJson, Upload } from "lucide-react";
+import { buttonStyles } from "@/components/ui/button-styles";
 import { FlashcardsEmptyState } from "@/components/features/flashcards-empty-state";
 import {
   FlashcardsStudy,
@@ -29,6 +32,8 @@ function toStudyCard(card: DueFlashcard): StudyCard {
     ),
   };
 }
+
+const TOOL_LINK_CLASS = buttonStyles({ variant: "secondary", size: "md" });
 
 function describeSession(sessionSize: number, totalDue: number): string {
   if (totalDue === 0) return "Nenhum card pendente agora.";
@@ -64,6 +69,21 @@ export async function FlashcardsSection() {
           <NewFlashcardDialog days={dayOptions} defaultDayId={defaultDay.id} />
         ) : null}
       </header>
+
+      <nav aria-label="Importar e exportar" className="flex flex-wrap gap-2">
+        <Link href="/flashcards/importar" className={TOOL_LINK_CLASS}>
+          <Upload aria-hidden className="size-4" />
+          Importar
+        </Link>
+        <a href="/api/flashcards/anki" download className={TOOL_LINK_CLASS}>
+          <Download aria-hidden className="size-4" />
+          Exportar para Anki
+        </a>
+        <a href="/api/flashcards/json" download className={TOOL_LINK_CLASS}>
+          <FileJson aria-hidden className="size-4" />
+          Exportar flashcards (JSON)
+        </a>
+      </nav>
 
       {due.cards.length > 0 ? (
         <FlashcardsStudy cards={due.cards.map(toStudyCard)} />

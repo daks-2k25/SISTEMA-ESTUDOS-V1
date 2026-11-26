@@ -71,6 +71,11 @@ export class InMemoryFlashcardRepository implements FlashcardRepository {
     return { ...created };
   }
 
+  async createMany(cards: NewFlashcard[]): Promise<number> {
+    for (const card of cards) await this.create(card);
+    return cards.length;
+  }
+
   async updateSchedule(
     id: string,
     schedule: FlashcardSchedule,

@@ -81,6 +81,12 @@ export class PrismaFlashcardRepository implements FlashcardRepository {
     return toFlashcard(row);
   }
 
+  async createMany(cards: NewFlashcard[]): Promise<number> {
+    if (cards.length === 0) return 0;
+    const result = await this.client.flashcard.createMany({ data: cards });
+    return result.count;
+  }
+
   async updateSchedule(
     id: string,
     schedule: FlashcardSchedule,

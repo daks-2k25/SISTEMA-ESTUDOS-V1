@@ -82,6 +82,42 @@ As aulas já estudadas e as datas reais de conclusão vêm de `STUDIED_LESSON_DA
 - No app: botão **Exportar backup (JSON)** no topo do Calendário (rota `/api/backup`, exige login).
 - No terminal: `npm run db:backup` salva o arquivo em `backups/` (pasta ignorada pelo Git).
 
+## Integrações
+
+Todas são opcionais e configuradas só por variáveis de ambiente (no `.env` e em **Vercel → Settings → Environment Variables**). Sem a variável, a integração mostra um aviso amigável em vez de quebrar.
+
+| Variável | Para que serve |
+|---|---|
+| `STUDY_START_HOUR` | Hora dos eventos do calendário .ics (0 a 23, padrão 19) |
+| `CALENDAR_TOKEN` | Permite assinar o calendário pela URL `/api/calendario.ics?token=...` |
+| `GITHUB_USERNAME` | Usuário do GitHub mostrado no card do dashboard |
+| `GITHUB_TOKEN` | Opcional; aumenta o limite de requisições à API do GitHub |
+| `CRON_SECRET` | Protege a rota do lembrete diário (`/api/cron/lembrete`) |
+| `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | Lembrete pelo Telegram |
+| `RESEND_API_KEY` / `EMAIL_TO` | Lembrete por e-mail (Resend) |
+
+Para gerar `CALENDAR_TOKEN` e `CRON_SECRET`, use o mesmo comando do `SESSION_SECRET` (um valor diferente para cada).
+
+**Flashcards:** em Flashcards há **Importar** (JSON ou CSV com prévia), **Exportar para Anki** (CSV) e **Exportar flashcards (JSON)**.
+
+**Calendário:** em Calendário há **Copiar resumo para o curso** (markdown) e o card **Adicionar ao calendário** (.ics para baixar ou URL para assinar).
+
+### Lembrete diário pelo Telegram
+
+1. No Telegram, abra o **@BotFather**, envie `/newbot`, escolha nome e usuário do bot e guarde o token. Ele vai em `TELEGRAM_BOT_TOKEN`.
+2. Abra a conversa com o seu bot e mande qualquer mensagem (por exemplo, `oi`).
+3. No navegador, abra `https://api.telegram.org/bot<SEU_TOKEN>/getUpdates`. Procure `"chat":{"id": ...}`: esse número vai em `TELEGRAM_CHAT_ID`.
+4. Crie um `CRON_SECRET`.
+5. Na Vercel, cadastre `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` e `CRON_SECRET` e faça um novo deploy (**Deployments → ⋯ → Redeploy**). Variáveis novas só valem depois do redeploy.
+
+O `vercel.json` agenda o lembrete todo dia às 22:00 UTC (19:00 em Brasília). Ele só envia se o dia de hoje ainda não estiver concluído. Para testar sem esperar:
+
+```bash
+curl -H "Authorization: Bearer SEU_CRON_SECRET" https://SEU-APP.vercel.app/api/cron/lembrete
+```
+
+Para e-mail, crie uma conta no Resend, gere a `RESEND_API_KEY` e defina `EMAIL_TO`. O remetente usado é `onboarding@resend.dev`, que serve para testes enviando ao e-mail da própria conta do Resend; para outros destinos é preciso verificar um domínio no Resend.
+
 ## Publicar na Vercel
 
 1. Importe o repositório na Vercel (framework Next.js, sem alterar comandos: o script `vercel-build` já aplica as migrações antes do build).

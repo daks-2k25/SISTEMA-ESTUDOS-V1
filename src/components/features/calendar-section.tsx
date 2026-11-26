@@ -2,6 +2,8 @@ import { connection } from "next/server";
 import { CalendarDays, Download } from "lucide-react";
 import { CalendarGrid } from "@/components/features/calendar-grid";
 import { CalendarLegend } from "@/components/features/calendar-legend";
+import { CalendarSubscribeCard } from "@/components/features/calendar-subscribe-card";
+import { CopySummaryButton } from "@/components/features/copy-summary-button";
 import { ModuleProgressPanel } from "@/components/features/module-progress-panel";
 import { RescheduleButton } from "@/components/features/reschedule-button";
 import { buttonStyles } from "@/components/ui/button-styles";
@@ -28,6 +30,7 @@ export async function CalendarSection() {
           </p>
         </div>
         <div className="flex flex-wrap items-start gap-3">
+          <CopySummaryButton />
           <a href="/api/backup" download className={buttonStyles({ variant: "secondary", size: "md" })}>
             <Download aria-hidden className="size-5" />
             Exportar backup (JSON)
@@ -42,6 +45,7 @@ export async function CalendarSection() {
 
       <CalendarGrid months={overview.months} />
       <ModuleProgressPanel modules={overview.modules} />
+      <CalendarSubscribeCard />
     </main>
   );
 }

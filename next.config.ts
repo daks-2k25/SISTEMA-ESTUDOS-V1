@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "avatars.githubusercontent.com" }],
+  },
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

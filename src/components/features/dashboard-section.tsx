@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Compass } from "lucide-react";
@@ -5,6 +6,7 @@ import { ChecklistCard } from "@/components/features/checklist-card";
 import { CompleteDayCard } from "@/components/features/complete-day-card";
 import { DayHeader } from "@/components/features/day-header";
 import { DayNavigator } from "@/components/features/day-navigator";
+import { GithubCard, GithubCardFallback } from "@/components/features/github-card";
 import { LessonReminder } from "@/components/features/lesson-reminder";
 import { ModuleDaysList } from "@/components/features/module-days-list";
 import { ModuleFilter } from "@/components/features/module-filter";
@@ -118,6 +120,9 @@ export async function DashboardSection({ searchParams }: DashboardSectionProps) 
             completedAtLabel={completedAtLabel}
             pendingTasks={data.pendingTasks}
           />
+          <Suspense fallback={<GithubCardFallback />}>
+            <GithubCard />
+          </Suspense>
           <GlassCard ariaLabel="Navegar pelos dias">
             <CardTitle icon={<Compass aria-hidden className="size-5 text-violet-300" />}>
               Navegar
