@@ -59,3 +59,11 @@ model DailyChallenge {
 
   @@index([isCompleted])
 }
+
+model LoginAttempt {
+  id          String   @id @default(cuid())
+  ip          String
+  attemptedAt DateTime @default(now())
+
+  @@index([ip, attemptedAt])
+}

@@ -22,6 +22,16 @@ Principais telas: **Estudar Hoje** (conteúdo, checklist, notas e sessão de 60 
 cp .env.example .env
 ```
 
+## Login
+
+O app tem um único usuário, definido em `src/lib/auth-config.ts`. A senha fica no código apenas como hash.
+
+1. Gere o hash da senha com `npm run auth:hash` e cole o resultado em `passwordHash`.
+2. Defina `SESSION_SECRET` no `.env` (texto aleatório com 32+ caracteres; o `.env.example` mostra como gerar).
+3. Na Vercel, cadastre o mesmo `SESSION_SECRET` em **Environment Variables**.
+
+Cinco senhas erradas seguidas bloqueiam o IP por 15 minutos. Com **Lembrar de mim**, a sessão dura 30 dias; sem ele, termina ao fechar o navegador (ou em 12 horas).
+
 ## Primeiros passos
 
 ```bash

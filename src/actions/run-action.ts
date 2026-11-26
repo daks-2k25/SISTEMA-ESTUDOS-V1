@@ -6,12 +6,14 @@ import {
   type ActionResult,
 } from "@/actions/action-result";
 import { InvalidInputError, NotFoundError } from "@/domain/errors";
+import { isAuthenticated } from "@/lib/session";
 
 interface RunActionOptions<Schema extends z.ZodType, Output> {
   schema: Schema;
   input: unknown;
   handler: (data: z.infer<Schema>) => Promise<Output>;
   shouldRevalidate?: boolean;
+  requiresSession?: boolean;
 }
 
 function describeError(error: unknown): string {
@@ -24,6 +26,10 @@ function describeError(error: unknown): string {
 export async function runAction<Schema extends z.ZodType, Output>(
   options: RunActionOptions<Schema, Output>,
 ): Promise<ActionResult<Output>> {
+  if (options.requiresSession !== false && !(await isAuthenticated())) {
+    return actionFailure("Sua sessão expirou. Entre novamente.");
+  }
+
   const parsed = options.schema.safeParse(options.input);
   if (!parsed.success) {
     return actionFailure("Dados inválidos. Revise e tente novamente.");

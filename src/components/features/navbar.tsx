@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { Flame, GraduationCap } from "lucide-react";
+import { Flame, GraduationCap, LogOut } from "lucide-react";
+import { logoutAction } from "@/actions/auth-actions";
 import { NavTabs } from "@/components/features/nav-tabs";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { APP_TIME_ZONE } from "@/lib/app-config";
 import { flashcardRepository, studyDayRepository } from "@/lib/repositories";
+import { isAuthenticated } from "@/lib/session";
 import { getNavbarSummary } from "@/use-cases/get-navbar-summary";
 
 function NavbarFrame({ children }: { children: React.ReactNode }) {
@@ -31,6 +33,20 @@ function Logo() {
   );
 }
 
+function LogoutButton() {
+  return (
+    <form action={logoutAction}>
+      <button
+        type="submit"
+        className="inline-flex min-h-11 items-center gap-2 rounded-2xl px-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white"
+      >
+        <LogOut aria-hidden className="size-4" />
+        Sair
+      </button>
+    </form>
+  );
+}
+
 export function NavbarFallback() {
   return (
     <NavbarFrame>
@@ -42,6 +58,8 @@ export function NavbarFallback() {
 
 export async function Navbar() {
   await connection();
+  if (!(await isAuthenticated())) return null;
+
   const summary = await getNavbarSummary(
     { studyDays: studyDayRepository, flashcards: flashcardRepository },
     new Date(),
@@ -75,7 +93,12 @@ export async function Navbar() {
           />
         </div>
       </div>
-      <NavTabs dueFlashcards={dueFlashcards} />
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <NavTabs dueFlashcards={dueFlashcards} />
+        </div>
+        <LogoutButton />
+      </div>
     </NavbarFrame>
   );
 }

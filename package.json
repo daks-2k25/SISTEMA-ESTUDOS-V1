@@ -11,6 +11,7 @@
     "db:setup": "prisma migrate deploy && npm run db:seed",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force && npm run db:seed",
+    "auth:hash": "tsx scripts/hash-password.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "postinstall": "prisma generate",
