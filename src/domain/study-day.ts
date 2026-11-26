@@ -25,6 +25,13 @@ export interface StudyDay {
   completedAt: Date | null;
   minutesStudied: number;
   notes: string | null;
+  quizScore: number | null;
+  difficulties: string | null;
+}
+
+export interface DayReflection {
+  quizScore: number | null;
+  difficulties: string | null;
 }
 
 export interface StudyDayWithRelations extends StudyDay {

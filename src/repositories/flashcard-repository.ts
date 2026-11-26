@@ -11,6 +11,7 @@ export interface DueFlashcardsQuery {
 
 export interface FlashcardRepository {
   count(): Promise<number>;
+  findAll(): Promise<Flashcard[]>;
   countDue(query: DueFlashcardsQuery): Promise<number>;
   findDue(query: DueFlashcardsQuery): Promise<Flashcard[]>;
   findNextReviewAfter(query: DueFlashcardsQuery): Promise<Date | null>;

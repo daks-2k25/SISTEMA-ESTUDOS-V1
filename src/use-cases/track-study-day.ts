@@ -1,7 +1,8 @@
 import { InvalidInputError, NotFoundError } from "@/domain/errors";
-import type { StudyDay } from "@/domain/study-day";
+import type { DayReflection, StudyDay } from "@/domain/study-day";
 import type { StudyDayRepository } from "@/repositories/study-day-repository";
 import { countPendingTasks } from "@/services/checklist";
+import { MAX_QUIZ_SCORE } from "@/services/quiz";
 
 async function requireStudyDay(
   repository: StudyDayRepository,
@@ -18,6 +19,29 @@ export async function saveStudyNotes(
 ): Promise<StudyDay> {
   const day = await requireStudyDay(repository, input.studyDayId);
   return repository.updateNotes(day.id, input.notes);
+}
+
+function isValidQuizScore(score: number | null): boolean {
+  return score === null || (Number.isInteger(score) && score >= 0 && score <= MAX_QUIZ_SCORE);
+}
+
+function normalizeText(text: string | null): string | null {
+  const trimmed = text?.trim() ?? "";
+  return trimmed === "" ? null : trimmed;
+}
+
+export async function saveDayReflection(
+  repository: StudyDayRepository,
+  input: { studyDayId: string } & DayReflection,
+): Promise<StudyDay> {
+  if (!isValidQuizScore(input.quizScore)) {
+    throw new InvalidInputError("A nota do quiz deve ser um número inteiro de 0 a 100");
+  }
+  const day = await requireStudyDay(repository, input.studyDayId);
+  return repository.updateReflection(day.id, {
+    quizScore: input.quizScore,
+    difficulties: normalizeText(input.difficulties),
+  });
 }
 
 export async function addStudyMinutes(

@@ -35,6 +35,11 @@ export class PrismaFlashcardRepository implements FlashcardRepository {
     return this.client.flashcard.count();
   }
 
+  async findAll(): Promise<Flashcard[]> {
+    const rows = await this.client.flashcard.findMany({ orderBy: { id: "asc" } });
+    return rows.map(toFlashcard);
+  }
+
   countDue(query: DueFlashcardsQuery): Promise<number> {
     return this.client.flashcard.count({ where: dueWhere(query) });
   }

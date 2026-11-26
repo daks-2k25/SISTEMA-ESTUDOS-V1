@@ -12,8 +12,11 @@ export interface DueFlashcard {
   intervalPreview: Record<FlashcardRating, string>;
 }
 
+export const FLASHCARD_SESSION_LIMIT = 20;
+
 export interface DueFlashcardsData {
   cards: DueFlashcard[];
+  totalDue: number;
   nextReviewAt: Date | null;
 }
 
@@ -28,7 +31,8 @@ export async function getDueFlashcards(
   if (cards.length > 0) {
     return {
       nextReviewAt: null,
-      cards: cards.map((card) => ({
+      totalDue: cards.length,
+      cards: cards.slice(0, FLASHCARD_SESSION_LIMIT).map((card) => ({
         id: card.id,
         moduleTitle: card.moduleTitle,
         question: card.question,
@@ -39,5 +43,5 @@ export async function getDueFlashcards(
     };
   }
 
-  return { cards: [], nextReviewAt: await repository.findNextReviewAfter(query) };
+  return { cards: [], totalDue: 0, nextReviewAt: await repository.findNextReviewAfter(query) };
 }

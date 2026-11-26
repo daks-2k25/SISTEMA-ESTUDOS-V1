@@ -1,26 +1,8 @@
-"use client";
-
-import { useState, useTransition } from "react";
-import { AlertTriangle, CalendarSync } from "lucide-react";
-import { rescheduleRemainingDays } from "@/actions/reschedule-remaining-days";
-import { Button } from "@/components/ui/button";
+import { AlertTriangle } from "lucide-react";
+import { RescheduleButton } from "@/components/features/reschedule-button";
 import { GlassCard } from "@/components/ui/glass-card";
 
 export function OverdueBanner() {
-  const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<string | null>(null);
-
-  function handleReschedule() {
-    startTransition(async () => {
-      const result = await rescheduleRemainingDays({ confirm: true });
-      setMessage(
-        result.ok
-          ? result.data.rescheduledCount + " dias reagendados a partir de hoje."
-          : result.error,
-      );
-    });
-  }
-
   return (
     <GlassCard
       as="div"
@@ -36,21 +18,11 @@ export function OverdueBanner() {
               Há dias anteriores a hoje ainda não concluídos. Reagende os dias restantes para
               continuar a partir de hoje.
             </p>
-            {message ? (
-              <p role="status" className="mt-2 text-sm font-semibold text-white">
-                {message}
-              </p>
-            ) : null}
           </div>
         </div>
-        <Button
-          icon={CalendarSync}
-          loading={isPending}
-          onClick={handleReschedule}
-          className="shrink-0"
-        >
-          Reagendar dias restantes
-        </Button>
+        <div className="shrink-0">
+          <RescheduleButton />
+        </div>
       </div>
     </GlassCard>
   );

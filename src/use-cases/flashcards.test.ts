@@ -9,7 +9,7 @@ import {
   buildStudyDay,
 } from "@/repositories/in-memory-study-day-repository";
 import { createFlashcard } from "@/use-cases/create-flashcard";
-import { getDueFlashcards } from "@/use-cases/get-due-flashcards";
+import { FLASHCARD_SESSION_LIMIT, getDueFlashcards } from "@/use-cases/get-due-flashcards";
 import { rateFlashcard } from "@/use-cases/rate-flashcard";
 
 const TIME_ZONE = "America/Sao_Paulo";
@@ -64,7 +64,21 @@ describe("getDueFlashcards", () => {
   it("retorna sem próxima revisão quando não há nenhum card", async () => {
     const data = await getDueFlashcards(new InMemoryFlashcardRepository(), NOW, TIME_ZONE);
 
-    expect(data).toEqual({ cards: [], nextReviewAt: null });
+    expect(data).toEqual({ cards: [], totalDue: 0, nextReviewAt: null });
+  });
+
+  it("limita a sessão a 20 cards e informa o total pendente", async () => {
+    const repository = new InMemoryFlashcardRepository(
+      Array.from({ length: 25 }, (_, index) =>
+        buildFlashcard({ id: "c" + index, nextReviewAt: hoursFromNow(-1 - index) }),
+      ),
+    );
+
+    const data = await getDueFlashcards(repository, NOW, TIME_ZONE);
+
+    expect(data.cards).toHaveLength(FLASHCARD_SESSION_LIMIT);
+    expect(data.totalDue).toBe(25);
+    expect(data.cards[0].id).toBe("c24");
   });
 });
 

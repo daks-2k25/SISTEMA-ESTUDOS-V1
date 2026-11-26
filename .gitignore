@@ -44,6 +44,9 @@ next-env.d.ts
 /prisma/dev.db*
 /src/generated
 
+# backups do banco (dados pessoais)
+/backups
+
 # banco local e anotacoes pessoais
 dev.db
 dev.db-journal

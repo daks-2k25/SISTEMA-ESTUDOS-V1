@@ -7,7 +7,12 @@ import type { StudyDayRepository } from "@/repositories/study-day-repository";
 import type { FlashcardRepository } from "@/repositories/flashcard-repository";
 import type { DailyChallengeRepository } from "@/repositories/daily-challenge-repository";
 import type { ChecklistTask } from "@/domain/study-day";
-import { COURSE_LESSONS_DONE, scheduledDateFor } from "./seed-data/config";
+import {
+  calendarDateFrom,
+  completionTimeFrom,
+  scheduledDateFor,
+  studiedDateFor,
+} from "./seed-data/config";
 import { seedPlan } from "./seed-data";
 import type { SeedPlanDay } from "./seed-data/types";
 
@@ -17,8 +22,27 @@ interface SeedRepositories {
   challenges: DailyChallengeRepository;
 }
 
-function isAlreadyStudied(day: SeedPlanDay): boolean {
-  return day.courseLesson !== null && day.courseLesson <= COURSE_LESSONS_DONE;
+interface StudiedDates {
+  scheduledDate: Date;
+  completedAt: Date;
+}
+
+function studiedDatesFor(day: SeedPlanDay, now: Date): StudiedDates | null {
+  const studiedOn = studiedDateFor(day.courseLesson);
+  if (!studiedOn) return null;
+  return {
+    scheduledDate: calendarDateFrom(studiedOn),
+    completedAt: completionTimeFrom(studiedOn, now),
+  };
+}
+
+async function applyStudiedDates(
+  studyDays: StudyDayRepository,
+  studyDayId: string,
+  dates: StudiedDates,
+): Promise<void> {
+  await studyDays.updateCompletion(studyDayId, { isCompleted: true, completedAt: dates.completedAt });
+  await studyDays.updateScheduledDates([{ id: studyDayId, scheduledDate: dates.scheduledDate }]);
 }
 
 function buildChecklist(day: SeedPlanDay, done: boolean): ChecklistTask[] {
@@ -35,8 +59,9 @@ async function seedDay(
   day: SeedPlanDay,
   now: Date,
 ): Promise<void> {
-  const scheduledDate = scheduledDateFor(day.dayNumber);
-  const studied = isAlreadyStudied(day);
+  const studiedDates = studiedDatesFor(day, now);
+  const studied = studiedDates !== null;
+  const scheduledDate = studiedDates?.scheduledDate ?? scheduledDateFor(day.dayNumber);
 
   const studyDay = await repositories.studyDays.upsertByDayNumber({
     dayNumber: day.dayNumber,
@@ -50,8 +75,12 @@ async function seedDay(
     keyTakeaways: day.keyTakeaways,
     checklistTasks: buildChecklist(day, studied),
     isCompleted: studied,
-    completedAt: studied ? scheduledDate : null,
+    completedAt: studiedDates?.completedAt ?? null,
   });
+
+  if (studiedDates && studyDay.isCompleted) {
+    await applyStudiedDates(repositories.studyDays, studyDay.id, studiedDates);
+  }
 
   await repositories.flashcards.createMissingForStudyDay(
     studyDay.id,
@@ -65,7 +94,7 @@ async function seedDay(
     })),
   );
 
-  await repositories.challenges.createMissingForStudyDay(
+  await repositories.challenges.syncForStudyDay(
     studyDay.id,
     day.challenges.map((challenge) => ({
       studyDayId: studyDay.id,

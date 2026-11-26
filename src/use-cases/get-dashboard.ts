@@ -6,6 +6,7 @@ import {
   chooseDayNumber,
   findAdjacentDayNumbers,
 } from "@/services/day-selection";
+import { evaluateDayScore, type ScoreFeedback } from "@/services/quiz";
 import { hasOverdueDays } from "@/services/reschedule";
 
 export interface ModuleDaySummary {
@@ -24,6 +25,7 @@ export interface DashboardData {
   moduleDays: ModuleDaySummary[];
   hasOverdueDays: boolean;
   pendingTasks: number;
+  scoreFeedback: ScoreFeedback;
 }
 
 export interface DashboardQuery {
@@ -75,5 +77,6 @@ export async function getDashboard(
       .map(toModuleDaySummary),
     hasOverdueDays: hasOverdueDays(days, query.now, query.timeZone),
     pendingTasks: countPendingTasks(day.checklistTasks),
+    scoreFeedback: evaluateDayScore(day.kind, day.quizScore),
   };
 }

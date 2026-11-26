@@ -1,6 +1,7 @@
 import type { PrismaClient, StudyDay as StudyDayRow } from "@prisma/client";
 import type {
   ChecklistTask,
+  DayReflection,
   NewStudyDay,
   ScheduledDateUpdate,
   StudyDay,
@@ -37,6 +38,8 @@ function toStudyDay(row: StudyDayRow): StudyDay {
     completedAt: row.completedAt,
     minutesStudied: row.minutesStudied,
     notes: row.notes,
+    quizScore: row.quizScore,
+    difficulties: row.difficulties,
   };
 }
 
@@ -114,6 +117,14 @@ export class PrismaStudyDayRepository implements StudyDayRepository {
     return toStudyDay(row);
   }
 
+  async updateReflection(id: string, reflection: DayReflection): Promise<StudyDay> {
+    const row = await this.client.studyDay.update({
+      where: { id },
+      data: { quizScore: reflection.quizScore, difficulties: reflection.difficulties },
+    });
+    return toStudyDay(row);
+  }
+
   async addMinutesStudied(id: string, minutes: number): Promise<StudyDay> {
     const row = await this.client.studyDay.update({
       where: { id },
@@ -137,14 +148,16 @@ export class PrismaStudyDayRepository implements StudyDayRepository {
   }
 
   async updateScheduledDates(updates: ScheduledDateUpdate[]): Promise<void> {
-    await this.client.$transaction(
-      updates.map((update) =>
-        this.client.studyDay.update({
-          where: { id: update.id },
-          data: { scheduledDate: update.scheduledDate },
-        }),
-      ),
-    );
+    if (updates.length === 0) return;
+    const ids = updates.map((update) => update.id);
+    const dates = updates.map((update) => update.scheduledDate.toISOString());
+
+    await this.client.$executeRaw`
+      UPDATE "StudyDay" AS day
+      SET "scheduledDate" = updated.scheduled_date::timestamp(3)
+      FROM unnest(${ids}::text[], ${dates}::text[]) AS updated(id, scheduled_date)
+      WHERE day.id = updated.id
+    `;
   }
 
   async updateChecklist(id: string, tasks: ChecklistTask[]): Promise<StudyDay> {

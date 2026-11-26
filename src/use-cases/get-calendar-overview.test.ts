@@ -19,9 +19,10 @@ describe("getCalendarOverview", () => {
     const overview = await getCalendarOverview(repository, NOW, TIME_ZONE);
 
     expect(overview.months.map((month) => month.key)).toEqual(["2026-11", "2026-12"]);
+    const noScore = { score: null, status: "sem-nota" };
     expect(overview.modules).toEqual([
-      { moduleTitle: "A", completed: 1, total: 2, percentage: 50 },
-      { moduleTitle: "B", completed: 0, total: 1, percentage: 0 },
+      { moduleTitle: "A", completed: 1, total: 2, percentage: 50, quiz: noScore, evaluation: null },
+      { moduleTitle: "B", completed: 0, total: 1, percentage: 0, quiz: noScore, evaluation: null },
     ]);
     expect(overview.progress.completedDays).toBe(1);
     expect(overview.months[0].tiles[1].isToday).toBe(true);

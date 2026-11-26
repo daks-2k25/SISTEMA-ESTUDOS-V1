@@ -300,13 +300,31 @@ console.log(typeof (3.14159).toFixed(2));
     ],
     challenges: [
       {
-        title: "Formatar preço em reais",
+        title: "Missão da Aula 4: calculadora com let, const e toFixed",
         description:
-          "Escreva formatarPreco(valor) que recebe um número e retorna o texto no formato 'R$ 12,50', com duas casas decimais e vírgula como separador.",
-        starterCode: "function formatarPreco(valor) {\n  \n}\n",
-        hint: "toFixed(2) gera '12.50'; troque o ponto por vírgula com replace.",
-        solutionCode:
-          'function formatarPreco(valor) {\n  return "R$ " + valor.toFixed(2).replace(".", ",");\n}\n',
+          "Monte a calculadora da aula. Guarde os dois números em const, use let para o resultado de cada operação e mostre no console soma, subtração, multiplicação e divisão, sempre com 2 casas decimais (toFixed). Com 10 e 3, a divisão deve aparecer como 3.33.",
+        starterCode: `const numero1 = 10;
+const numero2 = 3;
+let resultado;
+
+`,
+        hint: "Reaproveite a mesma variável let: atribua resultado = numero1 + numero2, mostre com resultado.toFixed(2) e repita para as outras operações.",
+        solutionCode: `const numero1 = 10;
+const numero2 = 3;
+let resultado;
+
+resultado = numero1 + numero2;
+console.log("Soma:", resultado.toFixed(2));
+
+resultado = numero1 - numero2;
+console.log("Subtração:", resultado.toFixed(2));
+
+resultado = numero1 * numero2;
+console.log("Multiplicação:", resultado.toFixed(2));
+
+resultado = numero1 / numero2;
+console.log("Divisão:", resultado.toFixed(2));
+`,
       },
     ],
   }),
@@ -386,13 +404,51 @@ function contar(...itens) {
     ],
     challenges: [
       {
-        title: "Calcular a média",
+        title: "Missão da Aula 5: calculadora com funções",
         description:
-          "Escreva media(...notas) que recebe qualquer quantidade de números e retorna a média. Para nenhuma nota, retorne 0.",
-        starterCode: "function media(...notas) {\n  \n}\n",
-        hint: "Trate o caso de lista vazia antes de dividir pelo tamanho.",
-        solutionCode:
-          "function media(...notas) {\n  if (notas.length === 0) return 0;\n  const soma = notas.reduce((total, nota) => total + nota, 0);\n  return soma / notas.length;\n}\n",
+          "Refaça a calculadora da Aula 4 usando funções. Crie somar, subtrair, multiplicar e dividir (cada uma recebe a e b e usa return) e uma função calcular(a, b, operacao) que escolhe a função certa para '+', '-', '*' ou '/' e devolve o resultado com 2 casas decimais. Divisão por zero e operação desconhecida devem retornar uma mensagem de erro.",
+        starterCode: `function somar(a, b) {
+
+}
+
+function calcular(a, b, operacao) {
+
+}
+
+console.log(calcular(10, 3, "/"));
+`,
+        hint: "Cada função pequena faz uma conta só. Em calcular, use if/else para a operação e chame toFixed(2) apenas no final. Teste dividir por zero antes de dividir.",
+        solutionCode: `function somar(a, b) {
+  return a + b;
+}
+
+function subtrair(a, b) {
+  return a - b;
+}
+
+function multiplicar(a, b) {
+  return a * b;
+}
+
+function dividir(a, b) {
+  return a / b;
+}
+
+function calcular(a, b, operacao) {
+  if (operacao === "+") return somar(a, b).toFixed(2);
+  if (operacao === "-") return subtrair(a, b).toFixed(2);
+  if (operacao === "*") return multiplicar(a, b).toFixed(2);
+  if (operacao === "/") {
+    if (b === 0) return "Erro: divisão por zero";
+    return dividir(a, b).toFixed(2);
+  }
+  return "Erro: operação inválida";
+}
+
+console.log(calcular(10, 3, "/"));
+console.log(calcular(10, 0, "/"));
+console.log(calcular(10, 3, "%"));
+`,
       },
     ],
   }),
@@ -483,13 +539,51 @@ if (lista.length === 0) {
     ],
     challenges: [
       {
-        title: "Tabuada",
+        title: "Missão da Aula 6: planejador de estudos da semana",
         description:
-          "Escreva tabuada(n) que retorna um array com 10 strings no formato '3 x 1 = 3', de 1 a 10.",
-        starterCode: "function tabuada(n) {\n  \n}\n",
-        hint: "Use um for de 1 a 10 e faça push de uma string montada com n, i e o produto.",
-        solutionCode:
-          'function tabuada(n) {\n  const linhas = [];\n  for (let i = 1; i <= 10; i++) {\n    linhas.push(n + " x " + i + " = " + n * i);\n  }\n  return linhas;\n}\n',
+          "Crie planejarSemana(horasPorDia), que recebe 7 números (horas de estudo de domingo a sábado). Use for para percorrer os dias, switch para converter o número do dia no nome (0 = Domingo ... 6 = Sábado) e if para classificar: 0 hora = 'descanso', até 1 hora = 'revisão leve', mais de 1 hora = 'foco total'. Mostre uma linha por dia e, no fim, o total de horas da semana.",
+        starterCode: `function nomeDoDia(numero) {
+
+}
+
+function planejarSemana(horasPorDia) {
+
+}
+
+planejarSemana([0, 2, 1, 2, 1, 3, 0.5]);
+`,
+        hint: "Em nomeDoDia, faça um case para cada número com return (assim não precisa de break). Em planejarSemana, some as horas numa variável let total dentro do for.",
+        solutionCode: `function nomeDoDia(numero) {
+  switch (numero) {
+    case 0: return "Domingo";
+    case 1: return "Segunda";
+    case 2: return "Terça";
+    case 3: return "Quarta";
+    case 4: return "Quinta";
+    case 5: return "Sexta";
+    case 6: return "Sábado";
+    default: return "Dia inválido";
+  }
+}
+
+function classificar(horas) {
+  if (horas === 0) return "descanso";
+  if (horas <= 1) return "revisão leve";
+  return "foco total";
+}
+
+function planejarSemana(horasPorDia) {
+  let total = 0;
+  for (let dia = 0; dia < 7; dia++) {
+    const horas = horasPorDia[dia];
+    total += horas;
+    console.log(nomeDoDia(dia) + ": " + horas + "h (" + classificar(horas) + ")");
+  }
+  console.log("Total da semana: " + total + "h");
+}
+
+planejarSemana([0, 2, 1, 2, 1, 3, 0.5]);
+`,
       },
     ],
   }),
@@ -564,13 +658,50 @@ const criar = (nome) => ({ nome });
     ],
     challenges: [
       {
-        title: "Contador com closure",
+        title: "Missão da Aula 7: gerador de IDs e sessões de estudo",
         description:
-          "Escreva criarContador(inicio = 0) que retorna um objeto com os métodos incrementar(), decrementar() e valor(), mantendo o número em uma variável privada.",
-        starterCode: "function criarContador(inicio = 0) {\n  \n}\n",
-        hint: "Declare let atual = inicio dentro da função e retorne um objeto de arrow functions.",
-        solutionCode:
-          "function criarContador(inicio = 0) {\n  let atual = inicio;\n  return {\n    incrementar: () => ++atual,\n    decrementar: () => --atual,\n    valor: () => atual,\n  };\n}\n",
+          "Crie criarGeradorDeId(prefixo), que guarda um contador privado (closure) e devolve uma arrow function que gera 'sessao-1', 'sessao-2'... a cada chamada. Depois crie criarSessao(tema, gerarId), que devolve um objeto com arrow functions: adicionarMinutos(minutos) soma ao tempo da sessão e resumo() devolve algo como 'sessao-1: Closures (45 min)'. Os minutos não podem ser acessados diretamente de fora.",
+        starterCode: `const criarGeradorDeId = (prefixo) => {
+
+};
+
+const criarSessao = (tema, gerarId) => {
+
+};
+
+const gerarId = criarGeradorDeId("sessao");
+const sessao = criarSessao("Closures", gerarId);
+sessao.adicionarMinutos(30);
+sessao.adicionarMinutos(15);
+console.log(sessao.resumo());
+`,
+        hint: "Em criarGeradorDeId, declare let contador = 0 fora da arrow function retornada. Em criarSessao, gere o id uma vez só e guarde os minutos em um let dentro da própria criarSessao.",
+        solutionCode: `const criarGeradorDeId = (prefixo) => {
+  let contador = 0;
+  return () => {
+    contador += 1;
+    return prefixo + "-" + contador;
+  };
+};
+
+const criarSessao = (tema, gerarId) => {
+  const id = gerarId();
+  let minutos = 0;
+  return {
+    adicionarMinutos: (quantidade) => {
+      minutos += quantidade;
+    },
+    resumo: () => id + ": " + tema + " (" + minutos + " min)",
+  };
+};
+
+const gerarId = criarGeradorDeId("sessao");
+const sessao = criarSessao("Closures", gerarId);
+sessao.adicionarMinutos(30);
+sessao.adicionarMinutos(15);
+console.log(sessao.resumo());
+console.log(criarSessao("Arrow functions", gerarId).resumo());
+`,
       },
     ],
   }),

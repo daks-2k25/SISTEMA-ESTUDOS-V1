@@ -1,8 +1,10 @@
 import { connection } from "next/server";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Download } from "lucide-react";
 import { CalendarGrid } from "@/components/features/calendar-grid";
 import { CalendarLegend } from "@/components/features/calendar-legend";
 import { ModuleProgressPanel } from "@/components/features/module-progress-panel";
+import { RescheduleButton } from "@/components/features/reschedule-button";
+import { buttonStyles } from "@/components/ui/button-styles";
 import { GlassCard } from "@/components/ui/glass-card";
 import { APP_TIME_ZONE } from "@/lib/app-config";
 import { studyDayRepository } from "@/lib/repositories";
@@ -24,6 +26,13 @@ export async function CalendarSection() {
           <p className="text-sm text-slate-300">
             {progress.completedDays} de {progress.totalDays} dias concluídos ({progress.percentage}%)
           </p>
+        </div>
+        <div className="flex flex-wrap items-start gap-3">
+          <a href="/api/backup" download className={buttonStyles({ variant: "secondary", size: "md" })}>
+            <Download aria-hidden className="size-5" />
+            Exportar backup (JSON)
+          </a>
+          <RescheduleButton size="md" />
         </div>
       </header>
 

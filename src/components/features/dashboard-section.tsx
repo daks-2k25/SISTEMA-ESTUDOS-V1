@@ -5,10 +5,12 @@ import { ChecklistCard } from "@/components/features/checklist-card";
 import { CompleteDayCard } from "@/components/features/complete-day-card";
 import { DayHeader } from "@/components/features/day-header";
 import { DayNavigator } from "@/components/features/day-navigator";
+import { LessonReminder } from "@/components/features/lesson-reminder";
 import { ModuleDaysList } from "@/components/features/module-days-list";
 import { ModuleFilter } from "@/components/features/module-filter";
 import { NotesCard } from "@/components/features/notes-card";
 import { OverdueBanner } from "@/components/features/overdue-banner";
+import { ReflectionCard } from "@/components/features/reflection-card";
 import { StudyContentCard } from "@/components/features/study-content-card";
 import { StudySessionCard } from "@/components/features/study-session-card";
 import { CardTitle, GlassCard } from "@/components/ui/glass-card";
@@ -74,6 +76,7 @@ export async function DashboardSection({ searchParams }: DashboardSectionProps) 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6">
       {data.hasOverdueDays ? <OverdueBanner /> : null}
+      {day.kind === "AULA" ? <LessonReminder /> : null}
       <DayHeader day={day} />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex min-w-0 flex-col gap-6 lg:col-span-2">
@@ -87,6 +90,13 @@ export async function DashboardSection({ searchParams }: DashboardSectionProps) 
             key={day.id}
             studyDayId={day.id}
             initialNotes={day.notes ?? ""}
+          />
+          <ReflectionCard
+            key={"reflexao-" + day.id}
+            studyDayId={day.id}
+            initialQuizScore={day.quizScore}
+            initialDifficulties={day.difficulties ?? ""}
+            feedback={data.scoreFeedback}
           />
         </div>
         <div className="flex min-w-0 flex-col gap-6">

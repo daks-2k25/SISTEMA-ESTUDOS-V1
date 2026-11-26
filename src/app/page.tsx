@@ -3,6 +3,7 @@ import {
   DashboardSection,
   type DashboardSearchParams,
 } from "@/components/features/dashboard-section";
+import { RouteLoading } from "@/components/features/route-loading";
 
 interface HomePageProps {
   searchParams: DashboardSearchParams;
@@ -10,11 +11,7 @@ interface HomePageProps {
 
 export default function HomePage({ searchParams }: HomePageProps) {
   return (
-    <Suspense
-      fallback={
-        <p className="px-6 py-10 text-center text-slate-400">Carregando o dia de estudo...</p>
-      }
-    >
+    <Suspense fallback={<RouteLoading area="o dia de estudo" />}>
       <DashboardSection searchParams={searchParams} />
     </Suspense>
   );

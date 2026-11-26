@@ -5,6 +5,7 @@ import type { ActionResult } from "@/actions/action-result";
 import { runAction } from "@/actions/run-action";
 import { studyDayRepository } from "@/lib/repositories";
 import { MAX_CUSTOM_TASK_LENGTH } from "@/services/checklist";
+import { MAX_DIFFICULTIES_LENGTH, MAX_QUIZ_SCORE } from "@/services/quiz";
 import {
   addCustomChecklistTask,
   removeCustomChecklistTask,
@@ -13,6 +14,7 @@ import {
 import {
   addStudyMinutes as addStudyMinutesUseCase,
   completeStudyDay,
+  saveDayReflection,
   saveStudyNotes,
   uncompleteStudyDay,
 } from "@/use-cases/track-study-day";
@@ -41,6 +43,23 @@ const minutesSchema = z.object({
 });
 
 const dayReferenceSchema = z.object({ studyDayId: studyDayIdSchema });
+
+const reflectionSchema = z.object({
+  studyDayId: studyDayIdSchema,
+  quizScore: z.number().int().min(0).max(MAX_QUIZ_SCORE).nullable(),
+  difficulties: z.string().max(MAX_DIFFICULTIES_LENGTH).nullable(),
+});
+
+export async function saveReflection(input: unknown): Promise<ActionResult<null>> {
+  return runAction({
+    schema: reflectionSchema,
+    input,
+    handler: async (data) => {
+      await saveDayReflection(studyDayRepository, data);
+      return null;
+    },
+  });
+}
 
 export interface CompleteDayActionData {
   pendingTasks: number;

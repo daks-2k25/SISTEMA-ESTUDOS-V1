@@ -37,6 +37,20 @@ describe("calculateStreak", () => {
     expect(calculateStreak(dates, NOW, TIME_ZONE)).toBe(2);
   });
 
+  it("ignora conclusões com data no futuro", () => {
+    const dates = [daysAgo(-1), daysAgo(-2), daysAgo(-3)];
+    expect(calculateStreak(dates, NOW, TIME_ZONE)).toBe(0);
+  });
+
+  it("fica em 0 com as datas reais das aulas 1 a 6 quando não houve estudo hoje nem ontem", () => {
+    const realDates = ["2026-10-22", "2026-10-22", "2026-10-29", "2026-11-08", "2026-11-16", "2026-11-23"].map(
+      (date) => new Date(date + "T15:00:00.000Z"),
+    );
+    const november25 = new Date("2026-11-25T15:00:00.000Z");
+
+    expect(calculateStreak(realDates, november25, TIME_ZONE)).toBe(0);
+  });
+
   it("usa o dia civil do fuso horário", () => {
     const lateNight = new Date("2026-12-11T01:30:00.000Z");
     const completedEvening = new Date("2026-12-10T22:00:00.000Z");

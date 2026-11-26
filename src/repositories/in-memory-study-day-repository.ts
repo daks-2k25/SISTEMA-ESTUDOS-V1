@@ -1,5 +1,6 @@
 import type {
   ChecklistTask,
+  DayReflection,
   NewStudyDay,
   ScheduledDateUpdate,
   StudyDay,
@@ -47,6 +48,8 @@ export class InMemoryStudyDayRepository implements StudyDayRepository {
       id: "dia-" + data.dayNumber,
       minutesStudied: 0,
       notes: null,
+      quizScore: null,
+      difficulties: null,
     };
     this.days.push(created);
     return created;
@@ -58,6 +61,10 @@ export class InMemoryStudyDayRepository implements StudyDayRepository {
 
   async updateNotes(id: string, notes: string): Promise<StudyDay> {
     return this.update(id, { notes });
+  }
+
+  async updateReflection(id: string, reflection: DayReflection): Promise<StudyDay> {
+    return this.update(id, reflection);
   }
 
   async addMinutesStudied(id: string, minutes: number): Promise<StudyDay> {
@@ -112,6 +119,8 @@ export function buildStudyDay(overrides: Partial<StudyDay> = {}): StudyDay {
     completedAt: null,
     minutesStudied: 0,
     notes: null,
+    quizScore: null,
+    difficulties: null,
     ...overrides,
   };
 }

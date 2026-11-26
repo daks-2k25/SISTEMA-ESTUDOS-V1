@@ -15,6 +15,11 @@ export class PrismaDailyChallengeRepository
     return this.client.dailyChallenge.count();
   }
 
+  async findAll(): Promise<DailyChallenge[]> {
+    const rows = await this.client.dailyChallenge.findMany({ orderBy: { id: "asc" } });
+    return rows.map(toDailyChallenge);
+  }
+
   async findById(id: string): Promise<DailyChallenge | null> {
     const row = await this.client.dailyChallenge.findUnique({ where: { id } });
     return row ? toDailyChallenge(row) : null;
@@ -51,17 +56,28 @@ export class PrismaDailyChallengeRepository
     return toDailyChallenge(row);
   }
 
-  async createMissingForStudyDay(
+  async syncForStudyDay(
     studyDayId: string,
     challenges: NewDailyChallenge[],
   ): Promise<void> {
-    const existing = await this.client.dailyChallenge.findMany({
-      where: { studyDayId },
-      select: { title: true },
-    });
-    const known = new Set(existing.map((challenge) => challenge.title));
-    const missing = challenges.filter((item) => !known.has(item.title));
-    if (missing.length === 0) return;
-    await this.client.dailyChallenge.createMany({ data: missing });
+    const plannedTitles = challenges.map((challenge) => challenge.title);
+
+    await this.client.$transaction([
+      this.client.dailyChallenge.deleteMany({
+        where: { studyDayId, title: { notIn: plannedTitles } },
+      }),
+      ...challenges.map((challenge) =>
+        this.client.dailyChallenge.upsert({
+          where: { studyDayId_title: { studyDayId, title: challenge.title } },
+          create: challenge,
+          update: {
+            description: challenge.description,
+            starterCode: challenge.starterCode,
+            hint: challenge.hint,
+            solutionCode: challenge.solutionCode,
+          },
+        }),
+      ),
+    ]);
   }
 }

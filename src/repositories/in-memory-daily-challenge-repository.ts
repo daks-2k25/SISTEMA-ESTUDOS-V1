@@ -17,6 +17,10 @@ export class InMemoryDailyChallengeRepository
     return this.challenges.length;
   }
 
+  async findAll(): Promise<DailyChallenge[]> {
+    return this.challenges.map((challenge) => ({ ...challenge }));
+  }
+
   async findById(id: string): Promise<DailyChallenge | null> {
     const challenge = this.challenges.find((item) => item.id === id);
     return challenge ? { ...challenge } : null;
@@ -42,21 +46,23 @@ export class InMemoryDailyChallengeRepository
     return this.update(id, { userCode, isCompleted: true });
   }
 
-  async createMissingForStudyDay(
+  async syncForStudyDay(
     studyDayId: string,
     challenges: NewDailyChallenge[],
   ): Promise<void> {
+    const plannedTitles = challenges.map((challenge) => challenge.title);
+    this.challenges = this.challenges.filter(
+      (item) => item.studyDayId !== studyDayId || plannedTitles.includes(item.title),
+    );
+
     for (const data of challenges) {
-      const exists = this.challenges.some(
+      const existing = this.challenges.find(
         (item) => item.studyDayId === studyDayId && item.title === data.title,
       );
-      if (!exists) {
-        this.challenges.push({
-          ...data,
-          id: "desafio-" + (this.challenges.length + 1),
-          isCompleted: false,
-          userCode: null,
-        });
+      if (existing) {
+        Object.assign(existing, data);
+      } else {
+        this.challenges.push({ ...data, id: "desafio-" + (this.challenges.length + 1), isCompleted: false, userCode: null });
       }
     }
   }

@@ -27,6 +27,10 @@ export class InMemoryFlashcardRepository implements FlashcardRepository {
     return this.cards.length;
   }
 
+  async findAll(): Promise<Flashcard[]> {
+    return this.cards.map((card) => ({ ...card }));
+  }
+
   async countDue(query: DueFlashcardsQuery): Promise<number> {
     return (await this.findDue(query)).length;
   }

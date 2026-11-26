@@ -1,4 +1,12 @@
+import type { StudyDayKind } from "@/domain/study-day-kind";
 import { startOfCalendarDay } from "@/services/dates";
+import {
+  EVALUATION_PASSING_SCORE,
+  QUIZ_TARGET,
+  averageScore,
+  scoreStatus,
+  type ScoreStatus,
+} from "@/services/quiz";
 
 export type CalendarTileState = "completed" | "today" | "overdue" | "future";
 
@@ -24,11 +32,26 @@ export interface CalendarMonth {
   tiles: CalendarTile[];
 }
 
+export interface ModuleDayInput {
+  dayNumber: number;
+  isCompleted: boolean;
+  moduleTitle: string;
+  kind: StudyDayKind;
+  quizScore: number | null;
+}
+
+export interface ModuleScore {
+  score: number | null;
+  status: ScoreStatus;
+}
+
 export interface ModuleProgress {
   moduleTitle: string;
   completed: number;
   total: number;
   percentage: number;
+  quiz: ModuleScore;
+  evaluation: ModuleScore | null;
 }
 
 const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
@@ -93,23 +116,40 @@ export function buildCalendarMonths(
   return [...months.values()].sort((first, second) => first.key.localeCompare(second.key));
 }
 
-export function calculateModuleProgress(
-  days: Array<Pick<CalendarDayInput, "dayNumber" | "isCompleted" | "moduleTitle">>,
-): ModuleProgress[] {
+function groupByModule(days: ModuleDayInput[]): Map<string, ModuleDayInput[]> {
   const ordered = [...days].sort((first, second) => first.dayNumber - second.dayNumber);
-  const totals = new Map<string, { completed: number; total: number }>();
-
+  const groups = new Map<string, ModuleDayInput[]>();
   for (const day of ordered) {
-    const entry = totals.get(day.moduleTitle) ?? { completed: 0, total: 0 };
-    entry.total += 1;
-    if (day.isCompleted) entry.completed += 1;
-    totals.set(day.moduleTitle, entry);
+    groups.set(day.moduleTitle, [...(groups.get(day.moduleTitle) ?? []), day]);
   }
+  return groups;
+}
 
-  return [...totals.entries()].map(([moduleTitle, entry]) => ({
+function summarizeEvaluation(days: ModuleDayInput[]): ModuleScore | null {
+  const evaluations = days.filter((day) => day.kind === "AVALIACAO");
+  if (evaluations.length === 0) return null;
+  const score = averageScore(evaluations.map((day) => day.quizScore));
+  return { score, status: scoreStatus(score, EVALUATION_PASSING_SCORE) };
+}
+
+function toModuleProgress(moduleTitle: string, days: ModuleDayInput[]): ModuleProgress {
+  const completed = days.filter((day) => day.isCompleted).length;
+  const quizAverage = averageScore(
+    days.filter((day) => day.kind !== "AVALIACAO").map((day) => day.quizScore),
+  );
+
+  return {
     moduleTitle,
-    completed: entry.completed,
-    total: entry.total,
-    percentage: Math.round((entry.completed / entry.total) * 100),
-  }));
+    completed,
+    total: days.length,
+    percentage: Math.round((completed / days.length) * 100),
+    quiz: { score: quizAverage, status: scoreStatus(quizAverage, QUIZ_TARGET) },
+    evaluation: summarizeEvaluation(days),
+  };
+}
+
+export function calculateModuleProgress(days: ModuleDayInput[]): ModuleProgress[] {
+  return [...groupByModule(days).entries()].map(([moduleTitle, moduleDays]) =>
+    toModuleProgress(moduleTitle, moduleDays),
+  );
 }

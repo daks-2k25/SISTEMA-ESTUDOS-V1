@@ -7,6 +7,7 @@ import {
 import {
   addStudyMinutes,
   completeStudyDay,
+  saveDayReflection,
   saveStudyNotes,
   uncompleteStudyDay,
 } from "@/use-cases/track-study-day";
@@ -24,6 +25,38 @@ function createRepository(): InMemoryStudyDayRepository {
     }),
   ]);
 }
+
+describe("saveDayReflection", () => {
+  it("salva a nota do quiz e as dificuldades sem espaços nas pontas", async () => {
+    const updated = await saveDayReflection(createRepository(), {
+      studyDayId: "dia-1",
+      quizScore: 85,
+      difficulties: "  closures ainda confusas  ",
+    });
+
+    expect(updated.quizScore).toBe(85);
+    expect(updated.difficulties).toBe("closures ainda confusas");
+  });
+
+  it("guarda null quando as dificuldades ficam em branco", async () => {
+    const updated = await saveDayReflection(createRepository(), {
+      studyDayId: "dia-1",
+      quizScore: null,
+      difficulties: "   ",
+    });
+
+    expect(updated.quizScore).toBeNull();
+    expect(updated.difficulties).toBeNull();
+  });
+
+  it("recusa nota fora de 0 a 100 ou com casas decimais", async () => {
+    for (const quizScore of [-1, 101, 80.5]) {
+      await expect(
+        saveDayReflection(createRepository(), { studyDayId: "dia-1", quizScore, difficulties: null }),
+      ).rejects.toBeInstanceOf(InvalidInputError);
+    }
+  });
+});
 
 describe("track-study-day", () => {
   it("salva as notas do dia", async () => {

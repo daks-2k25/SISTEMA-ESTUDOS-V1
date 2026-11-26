@@ -30,6 +30,14 @@ function toStudyCard(card: DueFlashcard): StudyCard {
   };
 }
 
+function describeSession(sessionSize: number, totalDue: number): string {
+  if (totalDue === 0) return "Nenhum card pendente agora.";
+  if (sessionSize < totalDue) {
+    return "Sessão com " + sessionSize + " de " + totalDue + " cards pendentes.";
+  }
+  return totalDue + (totalDue === 1 ? " card pendente" : " cards pendentes");
+}
+
 export async function FlashcardsSection() {
   await connection();
   const [due, days] = await Promise.all([
@@ -50,11 +58,7 @@ export async function FlashcardsSection() {
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-white sm:text-3xl">Flashcards</h1>
-          <p className="text-sm text-slate-300">
-            {due.cards.length === 0
-              ? "Nenhum card pendente agora."
-              : due.cards.length + (due.cards.length === 1 ? " card pendente" : " cards pendentes")}
-          </p>
+          <p className="text-sm text-slate-300">{describeSession(due.cards.length, due.totalDue)}</p>
         </div>
         {defaultDay ? (
           <NewFlashcardDialog days={dayOptions} defaultDayId={defaultDay.id} />

@@ -53,7 +53,9 @@ npm run dev
 | `npx tsc --noEmit` | Checagem de tipos |
 | `npm run lint` | ESLint |
 | `npm run db:setup` | Aplica as migrações e roda o seed |
-| `npm run db:seed` | Roda só o seed (idempotente: não apaga progresso nem reagendamentos) |
+| `npm run db:seed` | Roda só o seed (não apaga progresso; sincroniza o conteúdo dos desafios com o plano) |
+| `npm run db:backup` | Salva um backup JSON do banco em `backups/` |
+| `npm run auth:hash` | Gera o hash da senha de login |
 | `npm run db:reset` | **Apaga o banco inteiro**, reaplica as migrações e roda o seed |
 
 ## Como resetar o banco
@@ -71,9 +73,14 @@ Para só atualizar o conteúdo da trilha sem perder o progresso, use `npm run db
 1. Edite `START_DATE` em `prisma/seed-data/config.ts` (formato `Date.UTC(ano, mês - 1, dia)`).
 2. Rode `npm run db:reset` para recalcular as datas de todos os 120 dias.
 
-Se você só se atrasou, não precisa trocar a data: use o botão **Reagendar dias restantes**, que aparece no topo de Estudar Hoje quando há dias atrasados. Ele redistribui os dias não concluídos a partir de hoje.
+Se você só se atrasou, não precisa trocar a data: use o botão **Reagendar dias restantes**, que fica sempre no topo do Calendário (e aparece em Estudar Hoje quando há dias atrasados). Ele redistribui os dias não concluídos a partir de hoje.
 
-O progresso inicial (aulas já estudadas) vem de `COURSE_LESSONS_DONE`, no mesmo arquivo.
+As aulas já estudadas e as datas reais de conclusão vêm de `STUDIED_LESSON_DATES`, no mesmo arquivo. O seed nunca grava uma conclusão no futuro.
+
+## Backup
+
+- No app: botão **Exportar backup (JSON)** no topo do Calendário (rota `/api/backup`, exige login).
+- No terminal: `npm run db:backup` salva o arquivo em `backups/` (pasta ignorada pelo Git).
 
 ## Publicar na Vercel
 

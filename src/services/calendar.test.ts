@@ -3,6 +3,7 @@ import {
   buildCalendarMonths,
   calculateModuleProgress,
   type CalendarDayInput,
+  type ModuleDayInput,
 } from "@/services/calendar";
 
 const TIME_ZONE = "America/Sao_Paulo";
@@ -75,14 +76,48 @@ describe("buildCalendarMonths", () => {
   });
 });
 
+function buildModuleDays(total: number, completedUntil = 0): ModuleDayInput[] {
+  return buildDays(total, completedUntil).map((day) => ({
+    ...day,
+    kind: "AULA",
+    quizScore: null,
+  }));
+}
+
 describe("calculateModuleProgress", () => {
   it("agrupa por módulo na ordem dos dias e calcula a porcentagem", () => {
-    const progress = calculateModuleProgress(buildDays(20, 4));
+    const progress = calculateModuleProgress(buildModuleDays(20, 4));
 
-    expect(progress).toEqual([
+    expect(progress.map(({ moduleTitle, completed, total, percentage }) => ({
+      moduleTitle,
+      completed,
+      total,
+      percentage,
+    }))).toEqual([
       { moduleTitle: "Módulo A", completed: 4, total: 10, percentage: 40 },
       { moduleTitle: "Módulo B", completed: 0, total: 10, percentage: 0 },
     ]);
+  });
+
+  it("calcula a média do quiz sem contar as avaliações e compara com a meta de 80", () => {
+    const days: ModuleDayInput[] = [
+      { dayNumber: 1, isCompleted: true, moduleTitle: "M", kind: "AULA", quizScore: 90 },
+      { dayNumber: 2, isCompleted: true, moduleTitle: "M", kind: "AULA", quizScore: null },
+      { dayNumber: 3, isCompleted: true, moduleTitle: "M", kind: "AULA", quizScore: 60 },
+      { dayNumber: 4, isCompleted: true, moduleTitle: "M", kind: "AVALIACAO", quizScore: 72 },
+    ];
+
+    const [module] = calculateModuleProgress(days);
+
+    expect(module.quiz).toEqual({ score: 75, status: "abaixo" });
+    expect(module.evaluation).toEqual({ score: 72, status: "atingido" });
+  });
+
+  it("não mostra avaliação em módulo que não tem dia de avaliação", () => {
+    const [module] = calculateModuleProgress(buildModuleDays(3));
+
+    expect(module.evaluation).toBeNull();
+    expect(module.quiz).toEqual({ score: null, status: "sem-nota" });
   });
 
   it("retorna lista vazia sem dias", () => {

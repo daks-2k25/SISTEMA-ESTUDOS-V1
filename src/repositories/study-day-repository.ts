@@ -1,5 +1,6 @@
 import type {
   ChecklistTask,
+  DayReflection,
   NewStudyDay,
   ScheduledDateUpdate,
   StudyDay,
@@ -19,6 +20,7 @@ export interface StudyDayRepository {
   upsertByDayNumber(data: NewStudyDay): Promise<StudyDay>;
   updateChecklist(id: string, tasks: ChecklistTask[]): Promise<StudyDay>;
   updateNotes(id: string, notes: string): Promise<StudyDay>;
+  updateReflection(id: string, reflection: DayReflection): Promise<StudyDay>;
   addMinutesStudied(id: string, minutes: number): Promise<StudyDay>;
   updateCompletion(id: string, update: CompletionUpdate): Promise<StudyDay>;
   updateScheduledDates(updates: ScheduledDateUpdate[]): Promise<void>;
